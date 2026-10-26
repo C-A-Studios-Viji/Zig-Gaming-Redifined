@@ -1,63 +1,42 @@
-# Unison — Zig: Gaming Redifined
+# Zig — Gaming Redifined
+## Unison browser arcade
 
-A small native terminal arcade written in **Zig**, paired with a six-paragraph article about the language.
+**Play three simple games in your browser. No compiler, installation or account needed.**
 
-## Read the article
+### Start playing
 
-[Zig: Gaming Redifined — benefits, downsides and its potential impact](ARTICLE.md)
+1. Open [index.html](https://github.com/C-A-Studios-Viji/Zig-Gaming-Redifined/blob/main/index.html).
+2. Use GitHub's **Download raw file** button.
+3. Open the downloaded `index.html` in a browser.
+4. Pick Number Hunt, Rock Paper Scissors or Take the Last.
 
-The article includes a short, standalone Zig example. Its runnable source is [examples/launcher.zig](examples/launcher.zig).
+Alternatively, download this repository as a ZIP, extract it and open `index.html`.
 
-## Play
+GitHub's file preview shows source code; download the file to play.
+This repository update does not enable GitHub Pages hosting.
 
-Three games share one menu:
+### Games
 
-- **Number Hunt:** find a random number from 1–50 in seven guesses.
-- **Rock Paper Scissors:** play the computer; first to three wins.
-- **Take the Last:** alternate taking 1–3 stones; the last stone wins.
+- **Number Hunt:** guess a number from 1–50 in seven attempts.
+- **Rock Paper Scissors:** first to three wins; draws do not count.
+- **Take the Last:** take 1–3 stones per turn; whoever takes the final stone wins.
 
-This is a terminal application. It does not run inside a GitHub webpage.
+Use **Start again** to reset the current game. Switching games starts a fresh round.
+The arcade has no saved scores, external dependencies or network requests.
 
-### Requirements
+### Read
 
-Install **Zig 0.15.2** from the [official archive](https://ziglang.org/download/0.15.2/release-notes.html).
-This project pins that version; newer compiler releases are not claimed as tested.
-The launcher uses C standard I/O through Zig's C interoperability; game rules and input validation are written in Zig. No external game framework is required.
+[Six-paragraph article: Zig — Gaming Redifined](ARTICLE.md)
 
-### Build and run (macOS / Linux)
+### Implementation
 
-```sh
-zig build-exe src/main.zig -lc -O ReleaseSafe -femit-bin=unison
-./unison
-```
+**Zig is the arcade's name.** The current browser edition uses HTML, CSS and JavaScript.
+The earlier native Zig prototype remains in `src/main.zig`, with its small example in
+`examples/launcher.zig`; neither is required for the browser edition.
 
-### Build and run (Windows PowerShell)
+### Verification
 
-```powershell
-zig build-exe src/main.zig -lc -O ReleaseSafe -femit-bin=unison.exe
-.\unison.exe
-```
-
-Enter a menu number and press Enter. Invalid input is rejected. EOF exits cleanly.
-Rock Paper Scissors also accepts 0 to return to the menu. Ctrl+C stops the application.
-
-### Short example and tests
-
-```sh
-zig run examples/launcher.zig
-zig test src/main.zig -lc
-zig fmt --check src/main.zig examples/launcher.zig
-```
-
-## Scope
-
-A compact learning project with built-in games, rather than an installer for third-party titles.
-Scores last for the current match; there is no account system, saved progress, graphics or audio.
-Random moves use `std.crypto.random`. The computer in Take the Last chooses legal random moves, so it is beatable.
-
-## Validation
-
-Compiled and tested locally with Zig 0.15.2 on Linux in ReleaseSafe mode.
-Checks cover every Rock Paper Scissors outcome, menu validation, overlong input, EOF,
-and complete playthroughs of all three games. macOS and Windows commands are provided,
-but have not been executed on those operating systems.
+JavaScript checks passed for invalid guesses, guessing wins and losses, all nine
+Rock Paper Scissors outcomes, match wins and losses, legal stone moves, both stone-game winners,
+and game resets. These checks ran in Node with a minimal DOM stub; visual rendering and
+real browser interaction have not been verified.
