@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Zig — Gaming Redifined</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#101015;color:#f5f3ed}*{box-sizing:border-box}body{margin:0}main{max-width:1050px;margin:auto;padding:36px 22px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #35353d;padding-bottom:20px}a{color:#b4a1ff}h1{font-size:clamp(64px,12vw,120px);letter-spacing:-7px;margin:42px 0 0;line-height:1}h2{font-size:30px}p{line-height:1.7;color:#bebbc9}.tag{color:#bdff65;letter-spacing:3px;font-size:12px}nav{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:32px 0}button,input{font:inherit}button{cursor:pointer;border:1px solid #41404c;border-radius:16px;background:#202029;color:#fff;padding:16px}button:hover,button[aria-pressed=true]{border-color:#bdff65;background:#2a3030}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #bdff65;outline-offset:4px}.card{text-align:left;min-height:140px}.card b{display:block;margin:15px 0;font-size:20px}.card span{color:#bbb7c7}section{background:#191920;border:1px solid #35353d;border-radius:24px;padding:28px;min-height:300px}input{width:150px;padding:14px;border:1px solid #777;background:#101015;color:white;border-radius:12px}.actions{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}.primary{background:#bdff65;color:#101015;font-weight:700}#status{min-height:60px;color:#e1ffb8}footer{margin-top:30px;font-size:13px;color:#999}@media(max-width:650px){nav{grid-template-columns:1fr}.card{min-height:95px}section{padding:20px}h1{letter-spacing:-4px}}
+</style></head><body><main>
+<header><strong>UNISON / ZIG</strong><a href="https://github.com/C-A-Studios-Viji/Zig-Gaming-Redifined/blob/main/ARTICLE.md">Read the article ↗</a></header>
+<h1>Zig<span style="color:#bdff65">.</span></h1><p class="tag">GAMING REDIFINED</p><p>Three little games. One place to play.<br>Pick a game and jump straight in.</p>
+<nav aria-label="Choose a game"><button class="card" data-game="hunt"><span>01 / GUESS</span><b>Number Hunt</b>Find the hidden number.</button><button class="card" data-game="rps"><span>02 / CHANCE</span><b>Rock Paper Scissors</b>First to three takes the match.</button><button class="card" data-game="stones"><span>03 / STRATEGY</span><b>Take the Last</b>Make your last move count.</button></nav>
+<section aria-labelledby="game-title"><h2 id="game-title"></h2><p id="rules"></p><div id="controls"></div><p id="status" role="status" aria-live="polite"></p><button id="restart">Start again ↻</button></section>
+<footer>Zig is the name of this arcade. This browser version uses HTML, CSS and JavaScript. No installation, account or internet connection needed after downloading.</footer>
+</main><script>
+'use strict';
+const $=id=>document.getElementById(id);
+const random=n=>Math.floor(Math.random()*n);
+let current='hunt', secret=0, guesses=0, wins=0, losses=0, stones=15, done=false;
+function message(text){$('status').textContent=text;}
+function finish(text){done=true;message(text);$('controls').querySelectorAll('button,input').forEach(el=>el.disabled=true);}
+function start(game){
+ current=game;done=false;guesses=0;wins=0;losses=0;stones=15;secret=random(50)+1;
+ document.querySelectorAll('[data-game]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.game===game)));
+ if(game==='hunt'){
+ $('game-title').textContent='Number Hunt';$('rules').textContent='I picked a number from 1 to 50. You have seven guesses.';
+ $('controls').innerHTML='<form id="guess-form" class="actions"><label for="guess">Your guess <input id="guess" type="number" min="1" max="50" step="1" required></label><button class="primary">Guess</button></form>';
+ $('guess-form').addEventListener('submit',event=>{event.preventDefault();guess(Number($('guess').value));});
+ message('Seven guesses. Trust your instincts.');
+ }else if(game==='rps'){
+ $('game-title').textContent='Rock Paper Scissors';$('rules').textContent='Choose your move. First to three round wins takes the match. Draws do not count.';
+ $('controls').innerHTML='<div class="actions"><button data-move="0">Rock ✊</button><button data-move="1">Paper ✋</button><button data-move="2">Scissors ✌️</button></div>';
+ $('controls').querySelectorAll('[data-move]').forEach(el=>el.addEventListener('click',()=>playRps(Number(el.dataset.move))));
+ message('You 0 · Computer 0');
+ }else{
+ $('game-title').textContent='Take the Last';$('rules').textContent='Start with 15 stones. Take 1–3, then the computer takes its turn. Whoever takes the last stone wins.';
+ $('controls').innerHTML='<div class="actions"><button data-take="1">Take 1</button><button data-take="2">Take 2</button><button data-take="3">Take 3</button></div>';
+ $('controls').querySelectorAll('[data-take]').forEach(el=>el.addEventListener('click',()=>take(Number(el.dataset.take))));
+ message('15 stones left. Your turn.');
+ }
+}
+function guess(value){
+ if(done)return;
+ if(!Number.isInteger(value)||value<1||value>50){message('Enter a whole number from 1 to 50.');return;}
+ guesses++;
+ if(value===secret){finish('Found it! You win in '+guesses+' guesses.');return;}
+ if(guesses===7){finish('Out of guesses! The number was '+secret+'. Try a fresh round.');return;}
+ message((value<secret?'Go higher.':'Go lower.')+' '+(7-guesses)+' guesses left.');
+}
+function result(player,bot){return player===bot?0:((player-bot+3)%3===1?1:-1);}
+function playRps(player){
+ if(done)return;
+ const bot=random(3), names=['Rock','Paper','Scissors'], round=result(player,bot);
+ if(round===1)wins++;else if(round===-1)losses++;
+ const text='You: '+names[player]+' · Computer: '+names[bot]+'. '+(round===0?'Draw.':round===1?'You win the round!':'Computer wins the round.')+' Score '+wins+'–'+losses+'.';
+ if(wins===3||losses===3)finish(text+' '+(wins===3?'You win the match!':'Computer wins the match.'));else message(text);
+}
+function take(amount){
+ if(done)return;
+ if(!Number.isInteger(amount)||amount<1||amount>3||amount>stones){message('Choose a legal move from the remaining stones.');return;}
+ stones-=amount;
+ if(stones===0){finish('You took the last stone. You win!');return;}
+ const bot=random(Math.min(3,stones))+1;stones-=bot;
+ if(stones===0){finish('Computer takes '+bot+' and the last stone. Computer wins.');return;}
+ message('You took '+amount+'. Computer took '+bot+'. '+stones+' stones left. Your turn.');
+ $('controls').querySelectorAll('[data-take]').forEach(el=>el.disabled=Number(el.dataset.take)>stones);
+}
+document.querySelectorAll('[data-game]').forEach(el=>el.addEventListener('click',()=>start(el.dataset.game)));
+$('restart').addEventListener('click',()=>start(current));
+start('hunt');
+</script></body></html>
